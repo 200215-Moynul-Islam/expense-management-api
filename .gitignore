@@ -1,0 +1,15 @@
+# Binaries
+expense-management-api
+*.exe
+
+# Configuration files
+app.conf
+
+# VS Code settings
+.vscode/
+
+# Sonar Scanner files
+.scannerwork/
+
+# Test
+coverage.out
