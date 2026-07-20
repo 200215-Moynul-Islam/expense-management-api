@@ -12,6 +12,7 @@ import (
 
 type UserService interface {
 	RegisterUser(request dto.RegisterRequest) error
+	LoginUser(request dto.LoginRequest) (string, error)
 }
 
 type userService struct {
@@ -59,4 +60,38 @@ func (s *userService) RegisterUser(
 	}
 
 	return s.userRepository.Create(user)
+}
+
+func (s *userService) LoginUser(
+	request dto.LoginRequest,
+) (string, error) {
+
+	err := utils.ValidateLoginRequest(request)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := s.userRepository.GetByEmail(request.Email)
+	if err != nil {
+		return "", err
+	}
+
+	if user == nil {
+		return "", appErrors.ErrInvalidCredentials
+	}
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.Password),
+		[]byte(request.Password),
+	)
+	if err != nil {
+		return "", appErrors.ErrInvalidCredentials
+	}
+
+	token, err := utils.GenerateToken(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
