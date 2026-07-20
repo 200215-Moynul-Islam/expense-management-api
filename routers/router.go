@@ -8,7 +8,17 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/api/v1",
-		beego.NSRouter("/health", &controllers.HealthController{}),
+
+		beego.NSRouter(
+			"/health",
+			&controllers.HealthController{},
+		),
+
+		beego.NSRouter(
+			"/auth/register",
+			&controllers.AuthController{},
+			"post:Register",
+		),
 	)
 
 	beego.AddNamespace(ns)
