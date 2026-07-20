@@ -80,3 +80,40 @@ func mapValidationError(
 
 	return appErrors.ErrInvalidRequest
 }
+
+func ValidateCreateCategoryRequest(
+	request dto.CreateCategoryRequest,
+) error {
+
+	validationEngine := validation.Validation{}
+
+	_, err := validationEngine.Valid(&request)
+	if err != nil {
+		return err
+	}
+
+	if !validationEngine.HasErrors() {
+		return nil
+	}
+
+	return mapCategoryValidationError(validationEngine.Errors[0])
+}
+
+func mapCategoryValidationError(
+	validationError *validation.Error,
+) error {
+
+	switch validationError.Field {
+
+	case "Name":
+		switch validationError.Name {
+		case "Required":
+			return appErrors.ErrCategoryNameRequired
+
+		case "MaxSize":
+			return appErrors.ErrCategoryNameTooLong
+		}
+	}
+
+	return appErrors.ErrInvalidRequest
+}
