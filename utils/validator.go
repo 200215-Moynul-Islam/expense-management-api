@@ -25,6 +25,24 @@ func ValidateRegisterRequest(
 	return mapValidationError(validationEngine.Errors[0])
 }
 
+func ValidateLoginRequest(
+	request dto.LoginRequest,
+) error {
+
+	validationEngine := validation.Validation{}
+
+	_, err := validationEngine.Valid(&request)
+	if err != nil {
+		return err
+	}
+
+	if !validationEngine.HasErrors() {
+		return nil
+	}
+
+	return mapValidationError(validationEngine.Errors[0])
+}
+
 func mapValidationError(
 	validationError *validation.Error,
 ) error {
@@ -45,6 +63,8 @@ func mapValidationError(
 			return appErrors.ErrEmailRequired
 		case "Email":
 			return appErrors.ErrInvalidEmail
+		case "MaxSize":
+			return appErrors.ErrEmailTooLong
 		}
 
 	case "Password":
@@ -53,6 +73,8 @@ func mapValidationError(
 			return appErrors.ErrPasswordRequired
 		case "MinSize":
 			return appErrors.ErrPasswordTooShort
+		case "MaxSize":
+			return appErrors.ErrPasswordTooLong
 		}
 	}
 

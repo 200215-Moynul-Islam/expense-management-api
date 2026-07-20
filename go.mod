@@ -4,6 +4,7 @@ go 1.26
 
 require (
 	github.com/beego/beego/v2 v2.1.0
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/lib/pq v1.10.5
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd
 )
