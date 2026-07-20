@@ -46,46 +46,7 @@ func (c *AuthController) Register() {
 
 	err = c.userService.RegisterUser(request)
 	if err != nil {
-
-		switch {
-
-		case errors.Is(err, appErrors.ErrInvalidRequest),
-			errors.Is(err, appErrors.ErrNameRequired),
-			errors.Is(err, appErrors.ErrNameTooLong),
-			errors.Is(err, appErrors.ErrEmailRequired),
-			errors.Is(err, appErrors.ErrInvalidEmail),
-			errors.Is(err, appErrors.ErrPasswordRequired),
-			errors.Is(err, appErrors.ErrPasswordTooShort):
-
-			utils.SendJSONResponse(
-				c.Ctx,
-				http.StatusBadRequest,
-				false,
-				err.Error(),
-				nil,
-			)
-
-		case errors.Is(err, appErrors.ErrEmailExists):
-
-			utils.SendJSONResponse(
-				c.Ctx,
-				http.StatusConflict,
-				false,
-				err.Error(),
-				nil,
-			)
-
-		default:
-
-			utils.SendJSONResponse(
-				c.Ctx,
-				http.StatusInternalServerError,
-				false,
-				"Internal server error.",
-				nil,
-			)
-		}
-
+		c.handleError(err)
 		return
 	}
 
@@ -96,4 +57,96 @@ func (c *AuthController) Register() {
 		"User registered successfully.",
 		nil,
 	)
+}
+
+func (c *AuthController) Login() {
+
+	var request dto.LoginRequest
+
+	err := json.Unmarshal(
+		c.Ctx.Input.RequestBody,
+		&request,
+	)
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid request body.",
+			nil,
+		)
+		return
+	}
+
+	token, err := c.userService.LoginUser(request)
+	if err != nil {
+		c.handleError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Login successful.",
+		map[string]any{
+			"access_token": token,
+		},
+	)
+}
+
+func (c *AuthController) handleError(
+	err error,
+) {
+
+	switch {
+
+	case errors.Is(err, appErrors.ErrInvalidRequest),
+		errors.Is(err, appErrors.ErrNameRequired),
+		errors.Is(err, appErrors.ErrNameTooLong),
+		errors.Is(err, appErrors.ErrEmailRequired),
+		errors.Is(err, appErrors.ErrInvalidEmail),
+		errors.Is(err, appErrors.ErrEmailTooLong),
+		errors.Is(err, appErrors.ErrPasswordRequired),
+		errors.Is(err, appErrors.ErrPasswordTooShort),
+		errors.Is(err, appErrors.ErrPasswordTooLong):
+
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			err.Error(),
+			nil,
+		)
+
+	case errors.Is(err, appErrors.ErrEmailExists):
+
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusConflict,
+			false,
+			err.Error(),
+			nil,
+		)
+
+	case errors.Is(err, appErrors.ErrInvalidCredentials):
+
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			err.Error(),
+			nil,
+		)
+
+	default:
+
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusInternalServerError,
+			false,
+			"Internal server error.",
+			nil,
+		)
+	}
 }
