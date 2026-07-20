@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: expense-management-api-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: expense_management_db
+      POSTGRES_USER: expense_management_db_user
+      POSTGRES_PASSWORD: your_password
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
