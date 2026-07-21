@@ -153,6 +153,50 @@ func (c *ExpenseController) GetAll() {
 	)
 }
 
+func (c *ExpenseController) GetByID() {
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	id, err := c.GetInt(":id")
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid expense ID.",
+			nil,
+		)
+		return
+	}
+
+	expense, err := c.expenseService.GetExpenseByID(
+		id,
+		userID,
+	)
+	if err != nil {
+		c.handleError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Expense retrieved successfully.",
+		expense,
+	)
+}
+
 func (c *ExpenseController) handleError(
 	err error,
 ) {
@@ -182,7 +226,8 @@ func (c *ExpenseController) handleError(
 			nil,
 		)
 
-	case errors.Is(err, appErrors.ErrCategoryNotFound):
+	case errors.Is(err, appErrors.ErrCategoryNotFound),
+		errors.Is(err, appErrors.ErrExpenseNotFound):
 
 		utils.SendJSONResponse(
 			c.Ctx,
@@ -192,7 +237,8 @@ func (c *ExpenseController) handleError(
 			nil,
 		)
 
-	case errors.Is(err, appErrors.ErrForbiddenCategory):
+	case errors.Is(err, appErrors.ErrForbiddenCategory),
+		errors.Is(err, appErrors.ErrForbiddenExpense):
 
 		utils.SendJSONResponse(
 			c.Ctx,

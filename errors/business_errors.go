@@ -17,4 +17,7 @@ var (
 	ErrInvalidDateRange  = errors.New("From date cannot be after to date.")
 	ErrInvalidSortBy     = errors.New("Invalid sort field.")
 	ErrInvalidSortOrder  = errors.New("Invalid sort order.")
+
+	ErrExpenseNotFound = errors.New("Expense not found.")
+	ErrForbiddenExpense = errors.New("You do not have permission to access this expense.")
 )

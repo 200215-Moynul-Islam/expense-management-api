@@ -79,6 +79,12 @@ func init() {
 				&controllers.ExpenseController{},
 				"post:Create;get:GetAll",
 			),
+
+			beego.NSRouter(
+				"/:id",
+				&controllers.ExpenseController{},
+				"get:GetByID",
+			),
 		),
 	)
 

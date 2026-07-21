@@ -20,6 +20,11 @@ type ExpenseService interface {
 		userID int,
 		request dto.GetExpensesRequest,
 	) ([]*models.Expense, error)
+
+	GetExpenseByID(
+		id int,
+		userID int,
+	) (*models.Expense, error)
 }
 
 type expenseService struct {
@@ -111,4 +116,25 @@ func (s *expenseService) GetExpensesByUserID(
 		userID,
 		filter,
 	)
+}
+
+func (s *expenseService) GetExpenseByID(
+	id int,
+	userID int,
+) (*models.Expense, error) {
+
+	expense, err := s.expenseRepository.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if expense == nil {
+		return nil, appErrors.ErrExpenseNotFound
+	}
+
+	if expense.User.ID != userID {
+		return nil, appErrors.ErrForbiddenExpense
+	}
+
+	return expense, nil
 }
