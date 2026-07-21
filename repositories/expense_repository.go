@@ -30,6 +30,10 @@ type ExpenseRepository interface {
 	GetByID(
 		id int,
 	) (*models.Expense, error)
+
+	Delete(
+		expense *models.Expense,
+	) error
 }
 
 type expenseRepository struct{}
@@ -132,4 +136,15 @@ func (r *expenseRepository) GetByID(
 	}
 
 	return &expense, nil
+}
+
+func (r *expenseRepository) Delete(
+	expense *models.Expense,
+) error {
+
+	o := orm.NewOrm()
+
+	_, err := o.Delete(expense)
+
+	return err
 }

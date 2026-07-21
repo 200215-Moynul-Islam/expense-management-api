@@ -25,6 +25,11 @@ type ExpenseService interface {
 		id int,
 		userID int,
 	) (*models.Expense, error)
+
+	DeleteExpense(
+		id int,
+		userID int,
+	) error
 }
 
 type expenseService struct {
@@ -137,4 +142,25 @@ func (s *expenseService) GetExpenseByID(
 	}
 
 	return expense, nil
+}
+
+func (s *expenseService) DeleteExpense(
+	id int,
+	userID int,
+) error {
+
+	expense, err := s.expenseRepository.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	if expense == nil {
+		return appErrors.ErrExpenseNotFound
+	}
+
+	if expense.User.ID != userID {
+		return appErrors.ErrForbiddenExpense
+	}
+
+	return s.expenseRepository.Delete(expense)
 }
