@@ -99,7 +99,7 @@ func init() {
 			beego.NSRouter(
 				"/me",
 				&controllers.UserController{},
-				"get:GetProfile",
+				"get:GetProfile;put:Update",
 			),
 		),
 	)
