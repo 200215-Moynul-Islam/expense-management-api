@@ -28,6 +28,10 @@ type CategoryService interface {
 		userID int,
 		request dto.UpdateCategoryRequest,
 	) error
+	DeleteCategory(
+		id int,
+		userID int,
+	) error
 }
 
 type categoryService struct {
@@ -143,4 +147,25 @@ func (s *categoryService) UpdateCategory(
 	category.Name = request.Name
 
 	return s.categoryRepository.Update(category)
+}
+
+func (s *categoryService) DeleteCategory(
+	id int,
+	userID int,
+) error {
+
+	category, err := s.categoryRepository.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	if category == nil {
+		return appErrors.ErrCategoryNotFound
+	}
+
+	if category.User.ID != userID {
+		return appErrors.ErrForbiddenCategory
+	}
+
+	return s.categoryRepository.Delete(category)
 }
