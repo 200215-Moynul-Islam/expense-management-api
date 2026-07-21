@@ -4,6 +4,7 @@ import "errors"
 
 var (
 	ErrEmailExists = errors.New("Email already exists.")
+	ErrUserNotFound = errors.New("User not found.")
 
 	ErrCategoryExists = errors.New("Category already exists.")
 

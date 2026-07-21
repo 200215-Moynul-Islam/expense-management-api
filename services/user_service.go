@@ -13,6 +13,9 @@ import (
 type UserService interface {
 	RegisterUser(request dto.RegisterRequest) error
 	LoginUser(request dto.LoginRequest) (string, error)
+	GetByID(
+		userID int,
+	) (*models.User, error)
 }
 
 type userService struct {
@@ -94,4 +97,20 @@ func (s *userService) LoginUser(
 	}
 
 	return token, nil
+}
+
+func (s *userService) GetByID(
+	userID int,
+) (*models.User, error) {
+
+	user, err := s.userRepository.GetByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, appErrors.ErrUserNotFound
+	}
+
+	return user, nil
 }
