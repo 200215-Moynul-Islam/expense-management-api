@@ -8,7 +8,7 @@ type BaseController struct {
 	beego.Controller
 }
 
-func (c *CategoryController) getUserID() (int, bool) {
+func (c *BaseController) getUserID() (int, bool) {
 	userID, ok := c.Ctx.Input.GetData("userID").(int)
 	return userID, ok
 }

@@ -10,12 +10,10 @@ import (
 	"expense-management-api/repositories"
 	"expense-management-api/services"
 	"expense-management-api/utils"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
 type CategoryController struct {
-	beego.Controller
+	BaseController
 	categoryService services.CategoryService
 }
 
