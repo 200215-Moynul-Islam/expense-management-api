@@ -61,7 +61,7 @@ func init() {
 			beego.NSRouter(
 				"",
 				&controllers.CategoryController{},
-				"post:Create",
+				"post:Create;get:GetByUserID",
 			),
 		),
 
