@@ -26,6 +26,10 @@ type ExpenseRepository interface {
 		userID int,
 		filter ExpenseFilter,
 	) ([]*models.Expense, error)
+
+	GetByID(
+		id int,
+	) (*models.Expense, error)
 }
 
 type expenseRepository struct{}
@@ -104,4 +108,28 @@ func (r *expenseRepository) GetExpenses(
 	}
 
 	return expenses, nil
+}
+
+func (r *expenseRepository) GetByID(
+	id int,
+) (*models.Expense, error) {
+
+	o := orm.NewOrm()
+
+	var expense models.Expense
+
+	err := o.QueryTable(new(models.Expense)).
+		Filter("id", id).
+		RelatedSel().
+		One(&expense)
+
+	if err == orm.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &expense, nil
 }
