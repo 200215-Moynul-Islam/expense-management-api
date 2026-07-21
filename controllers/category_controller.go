@@ -116,3 +116,40 @@ func (c *CategoryController) handleCategoryError(
 		)
 	}
 }
+
+func (c *CategoryController) GetByUserID() {
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	categories, err := c.categoryService.GetCategoriesByUserID(
+		userID,
+	)
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusInternalServerError,
+			false,
+			"Internal server error.",
+			nil,
+		)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Categories retrieved successfully.",
+		categories,
+	)
+}
