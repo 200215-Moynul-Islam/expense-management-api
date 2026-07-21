@@ -63,6 +63,12 @@ func init() {
 				&controllers.CategoryController{},
 				"post:Create;get:GetByUserID",
 			),
+
+			beego.NSRouter(
+				"/:id",
+				&controllers.CategoryController{},
+				"get:GetByID",
+			),
 		),
 
 		beego.NSNamespace(
