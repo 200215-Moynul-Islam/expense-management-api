@@ -9,6 +9,7 @@ import (
 type CategoryRepository interface {
 	Create(category *models.Category) error
 	GetByNameAndUserID(name string, userID int) (*models.Category, error)
+	GetByID(id int) (*models.Category, error)
 }
 
 type categoryRepository struct{}
@@ -43,6 +44,29 @@ func (r *categoryRepository) GetByNameAndUserID(
 		Filter("name", name).
 		Filter("user_id", userID).
 		One(category)
+
+	if err == orm.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}
+
+func (r *categoryRepository) GetByID(
+	id int,
+) (*models.Category, error) {
+
+	o := orm.NewOrm()
+
+	category := &models.Category{
+		ID: id,
+	}
+
+	err := o.Read(category)
 
 	if err == orm.ErrNoRows {
 		return nil, nil

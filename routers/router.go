@@ -19,6 +19,18 @@ func init() {
 		beego.BeforeRouter,
 		middlewares.AuthFilter,
 	)
+
+	beego.InsertFilter(
+		"/api/v1/expenses",
+		beego.BeforeRouter,
+		middlewares.AuthFilter,
+	)
+
+	beego.InsertFilter(
+		"/api/v1/expenses/*",
+		beego.BeforeRouter,
+		middlewares.AuthFilter,
+	)
 	
 	ns := beego.NewNamespace("/api/v1",
 
@@ -49,6 +61,16 @@ func init() {
 			beego.NSRouter(
 				"",
 				&controllers.CategoryController{},
+				"post:Create",
+			),
+		),
+
+		beego.NSNamespace(
+			"/expenses",
+
+			beego.NSRouter(
+				"",
+				&controllers.ExpenseController{},
 				"post:Create",
 			),
 		),
