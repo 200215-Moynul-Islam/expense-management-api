@@ -25,6 +25,24 @@ func ValidateRegisterRequest(
 	return mapValidationError(validationEngine.Errors[0])
 }
 
+func ValidateUpdateUserRequest(
+	request dto.UpdateUserRequest,
+) error {
+
+	validationEngine := validation.Validation{}
+
+	_, err := validationEngine.Valid(&request)
+	if err != nil {
+		return err
+	}
+
+	if !validationEngine.HasErrors() {
+		return nil
+	}
+
+	return mapValidationError(validationEngine.Errors[0])
+}
+
 func ValidateLoginRequest(
 	request dto.LoginRequest,
 ) error {

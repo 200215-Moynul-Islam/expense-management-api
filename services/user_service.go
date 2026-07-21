@@ -16,6 +16,10 @@ type UserService interface {
 	GetByID(
 		userID int,
 	) (*models.User, error)
+	UpdateUser(
+		userID int,
+		request dto.UpdateUserRequest,
+	) error
 }
 
 type userService struct {
@@ -113,4 +117,28 @@ func (s *userService) GetByID(
 	}
 
 	return user, nil
+}
+
+func (s *userService) UpdateUser(
+	userID int,
+	request dto.UpdateUserRequest,
+) error {
+
+	err := utils.ValidateUpdateUserRequest(request)
+	if err != nil {
+		return err
+	}
+
+	user, err := s.userRepository.GetByID(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return appErrors.ErrUserNotFound
+	}
+
+	user.Name = request.Name
+
+	return s.userRepository.Update(user)
 }
