@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"expense-management-api/dto"
 	appErrors "expense-management-api/errors"
@@ -73,6 +74,85 @@ func (c *ExpenseController) Create() {
 	)
 }
 
+func (c *ExpenseController) GetAll() {
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	var request dto.GetExpensesRequest
+
+	if categoryID, err := c.GetInt("category_id"); err == nil {
+		request.CategoryID = &categoryID
+	}
+
+	if fromDate := c.GetString("from_date"); fromDate != "" {
+		t, err := time.Parse("2006-01-02", fromDate)
+		if err != nil {
+			utils.SendJSONResponse(
+				c.Ctx,
+				http.StatusBadRequest,
+				false,
+				"Invalid from_date. Use YYYY-MM-DD.",
+				nil,
+			)
+			return
+		}
+		request.FromDate = &t
+	}
+
+	if toDate := c.GetString("to_date"); toDate != "" {
+		t, err := time.Parse("2006-01-02", toDate)
+		if err != nil {
+			utils.SendJSONResponse(
+				c.Ctx,
+				http.StatusBadRequest,
+				false,
+				"Invalid to_date. Use YYYY-MM-DD.",
+				nil,
+			)
+			return
+		}
+		request.ToDate = &t
+	}
+
+	if page, err := c.GetInt("page"); err == nil {
+		request.Page = &page
+	}
+
+	if limit, err := c.GetInt("limit"); err == nil {
+		request.Limit = &limit
+	}
+
+	request.SortBy = c.GetString("sort_by")
+	request.SortOrder = c.GetString("sort_order")
+
+	expenses, err := c.expenseService.GetExpensesByUserID(
+		userID,
+		request,
+	)
+	if err != nil {
+		c.handleError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Expenses retrieved successfully.",
+		expenses,
+	)
+}
+
 func (c *ExpenseController) handleError(
 	err error,
 ) {
@@ -86,7 +166,13 @@ func (c *ExpenseController) handleError(
 		errors.Is(err, appErrors.ErrAmountRequired),
 		errors.Is(err, appErrors.ErrNoteTooLong),
 		errors.Is(err, appErrors.ErrExpenseDateRequired),
-		errors.Is(err, appErrors.ErrInvalidExpenseDate):
+		errors.Is(err, appErrors.ErrInvalidExpenseDate),
+		errors.Is(err, appErrors.ErrInvalidPage),
+		errors.Is(err, appErrors.ErrInvalidLimit),
+		errors.Is(err, appErrors.ErrInvalidPagination),
+		errors.Is(err, appErrors.ErrInvalidDateRange),
+		errors.Is(err, appErrors.ErrInvalidSortBy),
+		errors.Is(err, appErrors.ErrInvalidSortOrder):
 
 		utils.SendJSONResponse(
 			c.Ctx,
