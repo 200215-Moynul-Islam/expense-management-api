@@ -9,6 +9,7 @@ import (
 type CategoryRepository interface {
 	Create(category *models.Category) error
 	GetByNameAndUserID(name string, userID int) (*models.Category, error)
+	GetByID(id int) (*models.Category, error)
 }
 
 type categoryRepository struct{}
