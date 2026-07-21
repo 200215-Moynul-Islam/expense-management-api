@@ -99,6 +99,24 @@ func ValidateCreateCategoryRequest(
 	return mapCategoryValidationError(validationEngine.Errors[0])
 }
 
+func ValidateUpdateCategoryRequest(
+	request dto.UpdateCategoryRequest,
+) error {
+
+	validationEngine := validation.Validation{}
+
+	_, err := validationEngine.Valid(&request)
+	if err != nil {
+		return err
+	}
+
+	if !validationEngine.HasErrors() {
+		return nil
+	}
+
+	return mapCategoryValidationError(validationEngine.Errors[0])
+}
+
 func mapCategoryValidationError(
 	validationError *validation.Error,
 ) error {

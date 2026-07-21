@@ -11,6 +11,7 @@ type CategoryRepository interface {
 	GetByNameAndUserID(name string, userID int) (*models.Category, error)
 	GetByID(id int) (*models.Category, error)
 	GetAllByUserID(userID int) ([]*models.Category, error)
+	Update(category *models.Category) error
 }
 
 type categoryRepository struct{}
@@ -97,4 +98,15 @@ func (r *categoryRepository) GetAllByUserID(
 	}
 
 	return categories, nil
+}
+
+func (r *categoryRepository) Update(
+	category *models.Category,
+) error {
+
+	o := orm.NewOrm()
+
+	_, err := o.Update(category)
+
+	return err
 }

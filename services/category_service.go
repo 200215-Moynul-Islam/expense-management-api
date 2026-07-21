@@ -22,6 +22,12 @@ type CategoryService interface {
 		id int,
 		userID int,
 	) (*models.Category, error)
+
+	UpdateCategory(
+		id int,
+		userID int,
+		request dto.UpdateCategoryRequest,
+	) error
 }
 
 type categoryService struct {
@@ -96,4 +102,45 @@ func (s *categoryService) GetCategoryByID(
 	}
 
 	return category, nil
+}
+
+func (s *categoryService) UpdateCategory(
+	id int,
+	userID int,
+	request dto.UpdateCategoryRequest,
+) error {
+
+	err := utils.ValidateUpdateCategoryRequest(request)
+	if err != nil {
+		return err
+	}
+
+	category, err := s.categoryRepository.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	if category == nil {
+		return appErrors.ErrCategoryNotFound
+	}
+
+	if category.User.ID != userID {
+		return appErrors.ErrForbiddenCategory
+	}
+
+	existingCategory, err := s.categoryRepository.GetByNameAndUserID(
+		request.Name,
+		userID,
+	)
+	if err != nil {
+		return err
+	}
+
+	if existingCategory != nil && existingCategory.ID != category.ID {
+		return appErrors.ErrCategoryExists
+	}
+
+	category.Name = request.Name
+
+	return s.categoryRepository.Update(category)
 }
