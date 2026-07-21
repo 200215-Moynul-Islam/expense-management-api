@@ -2,11 +2,24 @@ package routers
 
 import (
 	"expense-management-api/controllers"
+	"expense-management-api/middlewares"
 
 	beego "github.com/beego/beego/v2/server/web"
 )
 
 func init() {
+	beego.InsertFilter(
+		"/api/v1/categories",
+		beego.BeforeRouter,
+		middlewares.AuthFilter,
+	)
+
+	beego.InsertFilter(
+		"/api/v1/categories/*",
+		beego.BeforeRouter,
+		middlewares.AuthFilter,
+	)
+	
 	ns := beego.NewNamespace("/api/v1",
 
 		beego.NSRouter(
@@ -14,16 +27,30 @@ func init() {
 			&controllers.HealthController{},
 		),
 
-		beego.NSRouter(
-			"/auth/register",
-			&controllers.AuthController{},
-			"post:Register",
+		beego.NSNamespace(
+			"/auth",
+
+			beego.NSRouter(
+				"/register",
+				&controllers.AuthController{},
+				"post:Register",
+			),
+
+			beego.NSRouter(
+				"/login",
+				&controllers.AuthController{},
+				"post:Login",
+			),
 		),
 
-		beego.NSRouter(
-			"/auth/login",
-			&controllers.AuthController{},
-			"post:Login",
+		beego.NSNamespace(
+			"/categories",
+
+			beego.NSRouter(
+				"",
+				&controllers.CategoryController{},
+				"post:Create",
+			),
 		),
 	)
 
