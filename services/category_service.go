@@ -17,6 +17,11 @@ type CategoryService interface {
 	GetCategoriesByUserID(
 		userID int,
 	) ([]*models.Category, error)
+
+	GetCategoryByID(
+		id int,
+		userID int,
+	) (*models.Category, error)
 }
 
 type categoryService struct {
@@ -70,4 +75,25 @@ func (s *categoryService) GetCategoriesByUserID(
 ) ([]*models.Category, error) {
 
 	return s.categoryRepository.GetAllByUserID(userID)
+}
+
+func (s *categoryService) GetCategoryByID(
+	id int,
+	userID int,
+) (*models.Category, error) {
+
+	category, err := s.categoryRepository.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if category == nil {
+		return nil, appErrors.ErrCategoryNotFound
+	}
+
+	if category.User.ID != userID {
+		return nil, appErrors.ErrForbiddenCategory
+	}
+
+	return category, nil
 }

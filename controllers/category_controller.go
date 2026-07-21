@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -151,5 +152,82 @@ func (c *CategoryController) GetByUserID() {
 		true,
 		"Categories retrieved successfully.",
 		categories,
+	)
+}
+
+func (c *CategoryController) GetByID() {
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	id, err := c.GetInt(":id")
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid category ID.",
+			nil,
+		)
+		return
+	}
+
+	category, err := c.categoryService.GetCategoryByID(
+		id,
+		userID,
+	)
+	if err != nil {
+
+		switch {
+
+		case errors.Is(err, appErrors.ErrCategoryNotFound):
+
+			utils.SendJSONResponse(
+				c.Ctx,
+				http.StatusNotFound,
+				false,
+				err.Error(),
+				nil,
+			)
+
+		case errors.Is(err, appErrors.ErrForbiddenCategory):
+
+			utils.SendJSONResponse(
+				c.Ctx,
+				http.StatusForbidden,
+				false,
+				err.Error(),
+				nil,
+			)
+
+		default:
+
+			utils.SendJSONResponse(
+				c.Ctx,
+				http.StatusInternalServerError,
+				false,
+				"Internal server error.",
+				nil,
+			)
+		}
+
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Category retrieved successfully.",
+		category,
 	)
 }
