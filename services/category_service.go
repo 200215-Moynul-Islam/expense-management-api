@@ -13,6 +13,10 @@ type CategoryService interface {
 		request dto.CreateCategoryRequest,
 		userID int,
 	) error
+
+	GetCategoriesByUserID(
+		userID int,
+	) ([]*models.Category, error)
 }
 
 type categoryService struct {
@@ -59,4 +63,11 @@ func (s *categoryService) CreateCategory(
 	}
 
 	return s.categoryRepository.Create(category)
+}
+
+func (s *categoryService) GetCategoriesByUserID(
+	userID int,
+) ([]*models.Category, error) {
+
+	return s.categoryRepository.GetAllByUserID(userID)
 }
