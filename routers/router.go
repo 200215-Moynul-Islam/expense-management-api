@@ -77,7 +77,7 @@ func init() {
 			beego.NSRouter(
 				"",
 				&controllers.ExpenseController{},
-				"post:Create",
+				"post:Create;get:GetAll",
 			),
 		),
 	)

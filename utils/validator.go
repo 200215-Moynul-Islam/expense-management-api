@@ -156,6 +156,48 @@ func ValidateCreateExpenseRequest(
 	)
 }
 
+func ValidateGetExpensesRequest(
+	request dto.GetExpensesRequest,
+) error {
+
+	if request.Page != nil && *request.Page < 1 {
+		return appErrors.ErrInvalidPage
+	}
+
+	if request.Limit != nil && *request.Limit < 1 {
+		return appErrors.ErrInvalidLimit
+	}
+
+	if (request.Page == nil) != (request.Limit == nil) {
+		return appErrors.ErrInvalidPagination
+	}
+
+	if request.FromDate != nil &&
+		request.ToDate != nil &&
+		request.FromDate.After(*request.ToDate) {
+
+		return appErrors.ErrInvalidDateRange
+	}
+
+	if request.SortBy != "" {
+		switch request.SortBy {
+		case "created_at", "expense_date", "amount":
+		default:
+			return appErrors.ErrInvalidSortBy
+		}
+	}
+
+	if request.SortOrder != "" {
+		switch request.SortOrder {
+		case "asc", "desc":
+		default:
+			return appErrors.ErrInvalidSortOrder
+		}
+	}
+
+	return nil
+}
+
 func mapExpenseValidationError(
 	validationError *validation.Error,
 ) error {

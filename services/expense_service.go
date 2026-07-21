@@ -15,6 +15,11 @@ type ExpenseService interface {
 		request dto.CreateExpenseRequest,
 		userID int,
 	) error
+
+	GetExpensesByUserID(
+		userID int,
+		request dto.GetExpensesRequest,
+	) ([]*models.Expense, error)
 }
 
 type expenseService struct {
@@ -80,4 +85,30 @@ func (s *expenseService) CreateExpense(
 	}
 
 	return s.expenseRepository.Create(expense)
+}
+
+func (s *expenseService) GetExpensesByUserID(
+	userID int,
+	request dto.GetExpensesRequest,
+) ([]*models.Expense, error) {
+
+	err := utils.ValidateGetExpensesRequest(request)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := repositories.ExpenseFilter{
+		CategoryID: request.CategoryID,
+		FromDate:   request.FromDate,
+		ToDate:     request.ToDate,
+		Page:       request.Page,
+		Limit:      request.Limit,
+		SortBy:     request.SortBy,
+		SortOrder:  request.SortOrder,
+	}
+
+	return s.expenseRepository.GetExpenses(
+		userID,
+		filter,
+	)
 }
