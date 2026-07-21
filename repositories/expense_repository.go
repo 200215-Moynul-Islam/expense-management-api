@@ -34,6 +34,8 @@ type ExpenseRepository interface {
 	Delete(
 		expense *models.Expense,
 	) error
+
+	Update(expense *models.Expense) error
 }
 
 type expenseRepository struct{}
@@ -145,6 +147,17 @@ func (r *expenseRepository) Delete(
 	o := orm.NewOrm()
 
 	_, err := o.Delete(expense)
+
+	return err
+}
+
+func (r *expenseRepository) Update(
+	expense *models.Expense,
+) error {
+
+	o := orm.NewOrm()
+
+	_, err := o.Update(expense)
 
 	return err
 }

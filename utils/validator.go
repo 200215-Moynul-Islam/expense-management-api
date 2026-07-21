@@ -156,6 +156,26 @@ func ValidateCreateExpenseRequest(
 	)
 }
 
+func ValidateUpdateExpenseRequest(
+	request dto.UpdateExpenseRequest,
+) error {
+
+	validationEngine := validation.Validation{}
+
+	_, err := validationEngine.Valid(&request)
+	if err != nil {
+		return err
+	}
+
+	if !validationEngine.HasErrors() {
+		return nil
+	}
+
+	return mapExpenseValidationError(
+		validationEngine.Errors[0],
+	)
+}
+
 func ValidateGetExpensesRequest(
 	request dto.GetExpensesRequest,
 ) error {
