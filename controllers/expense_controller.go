@@ -241,6 +241,68 @@ func (c *ExpenseController) Delete() {
 	)
 }
 
+func (c *ExpenseController) Update() {
+
+	var request dto.UpdateExpenseRequest
+
+	err := json.Unmarshal(
+		c.Ctx.Input.RequestBody,
+		&request,
+	)
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid request body.",
+			nil,
+		)
+		return
+	}
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	id, err := c.GetInt(":id")
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid expense ID.",
+			nil,
+		)
+		return
+	}
+
+	err = c.expenseService.UpdateExpense(
+		id,
+		userID,
+		request,
+	)
+	if err != nil {
+		c.handleError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Expense updated successfully.",
+		nil,
+	)
+}
+
 func (c *ExpenseController) handleError(
 	err error,
 ) {

@@ -83,7 +83,7 @@ func init() {
 			beego.NSRouter(
 				"/:id",
 				&controllers.ExpenseController{},
-				"get:GetByID;delete:Delete",
+				"get:GetByID;put:Update;delete:Delete",
 			),
 		),
 	)
