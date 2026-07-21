@@ -138,7 +138,20 @@ func (s *userService) UpdateUser(
 		return appErrors.ErrUserNotFound
 	}
 
+	if user.Email != request.Email {
+
+		existingUser, err := s.userRepository.GetByEmail(request.Email)
+		if err != nil {
+			return err
+		}
+
+		if existingUser != nil {
+			return appErrors.ErrEmailExists
+		}
+	}
+
 	user.Name = request.Name
+	user.Email = request.Email
 
 	return s.userRepository.Update(user)
 }
