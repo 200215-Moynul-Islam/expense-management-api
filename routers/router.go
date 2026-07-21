@@ -31,6 +31,12 @@ func init() {
 		beego.BeforeRouter,
 		middlewares.AuthFilter,
 	)
+
+	beego.InsertFilter(
+		"/api/v1/users/*",
+		beego.BeforeRouter,
+		middlewares.AuthFilter,
+	)
 	
 	ns := beego.NewNamespace("/api/v1",
 
@@ -84,6 +90,16 @@ func init() {
 				"/:id",
 				&controllers.ExpenseController{},
 				"get:GetByID;put:Update;delete:Delete",
+			),
+		),
+
+		beego.NSNamespace(
+			"/users",
+
+			beego.NSRouter(
+				"/me",
+				&controllers.UserController{},
+				"get:GetProfile",
 			),
 		),
 	)
