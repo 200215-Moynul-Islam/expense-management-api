@@ -30,6 +30,12 @@ type ExpenseService interface {
 		id int,
 		userID int,
 	) error
+
+	UpdateExpense(
+		id int,
+		userID int,
+		request dto.UpdateExpenseRequest,
+	) error
 }
 
 type expenseService struct {
@@ -163,4 +169,58 @@ func (s *expenseService) DeleteExpense(
 	}
 
 	return s.expenseRepository.Delete(expense)
+}
+
+func (s *expenseService) UpdateExpense(
+	id int,
+	userID int,
+	request dto.UpdateExpenseRequest,
+) error {
+
+	err := utils.ValidateUpdateExpenseRequest(request)
+	if err != nil {
+		return err
+	}
+
+	expense, err := s.expenseRepository.GetByID(id)
+	if err != nil {
+		return err
+	}
+
+	if expense == nil {
+		return appErrors.ErrExpenseNotFound
+	}
+
+	if expense.User.ID != userID {
+		return appErrors.ErrForbiddenExpense
+	}
+
+	category, err := s.categoryRepository.GetByID(request.CategoryID)
+	if err != nil {
+		return err
+	}
+
+	if category == nil {
+		return appErrors.ErrCategoryNotFound
+	}
+
+	if category.User.ID != userID {
+		return appErrors.ErrForbiddenCategory
+	}
+
+	expenseDate, err := time.Parse(
+		"2006-01-02",
+		request.ExpenseDate,
+	)
+	if err != nil {
+		return appErrors.ErrInvalidExpenseDate
+	}
+
+	expense.Category = category
+	expense.Title = request.Title
+	expense.Amount = request.Amount
+	expense.Note = request.Note
+	expense.ExpenseDate = expenseDate
+
+	return s.expenseRepository.Update(expense)
 }
