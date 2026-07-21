@@ -54,3 +54,26 @@ func (r *categoryRepository) GetByNameAndUserID(
 
 	return category, nil
 }
+
+func (r *categoryRepository) GetByID(
+	id int,
+) (*models.Category, error) {
+
+	o := orm.NewOrm()
+
+	category := &models.Category{
+		ID: id,
+	}
+
+	err := o.Read(category)
+
+	if err == orm.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}
