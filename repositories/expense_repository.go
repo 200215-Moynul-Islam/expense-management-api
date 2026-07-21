@@ -2,12 +2,30 @@ package repositories
 
 import (
 	"expense-management-api/models"
+	"time"
 
 	"github.com/beego/beego/v2/client/orm"
 )
 
+type ExpenseFilter struct {
+	CategoryID *int
+
+	FromDate *time.Time
+	ToDate   *time.Time
+
+	Page  *int
+	Limit *int
+
+	SortBy    string
+	SortOrder string
+}
+
 type ExpenseRepository interface {
 	Create(expense *models.Expense) error
+	GetExpenses(
+		userID int,
+		filter ExpenseFilter,
+	) ([]*models.Expense, error)
 }
 
 type expenseRepository struct{}
@@ -25,4 +43,65 @@ func (r *expenseRepository) Create(
 	_, err := o.Insert(expense)
 
 	return err
+}
+
+func (r *expenseRepository) GetExpenses(
+	userID int,
+	filter ExpenseFilter,
+) ([]*models.Expense, error) {
+
+	o := orm.NewOrm()
+
+	query := o.QueryTable(new(models.Expense)).
+	Filter("user_id", userID).
+	RelatedSel()
+
+	if filter.CategoryID != nil {
+		query = query.Filter(
+			"category_id",
+			*filter.CategoryID,
+		)
+	}
+
+	if filter.FromDate != nil {
+		query = query.Filter(
+			"expense_date__gte",
+			*filter.FromDate,
+		)
+	}
+
+	if filter.ToDate != nil {
+		query = query.Filter(
+			"expense_date__lte",
+			*filter.ToDate,
+		)
+	}
+
+	if filter.SortBy != "" {
+
+		sortField := filter.SortBy
+
+		if filter.SortOrder == "desc" {
+			sortField = "-" + sortField
+		}
+
+		query = query.OrderBy(sortField)
+	}
+
+	if filter.Page != nil && filter.Limit != nil {
+
+		offset := (*filter.Page - 1) * (*filter.Limit)
+
+		query = query.Offset(offset)
+		query = query.Limit(*filter.Limit)
+	}
+
+	var expenses []*models.Expense
+
+	_, err := query.All(&expenses)
+	if err != nil {
+		return nil, err
+	}
+
+	return expenses, nil
 }
