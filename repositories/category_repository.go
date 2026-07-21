@@ -12,6 +12,7 @@ type CategoryRepository interface {
 	GetByID(id int) (*models.Category, error)
 	GetAllByUserID(userID int) ([]*models.Category, error)
 	Update(category *models.Category) error
+	Delete(category *models.Category) error
 }
 
 type categoryRepository struct{}
@@ -107,6 +108,17 @@ func (r *categoryRepository) Update(
 	o := orm.NewOrm()
 
 	_, err := o.Update(category)
+
+	return err
+}
+
+func (r *categoryRepository) Delete(
+	category *models.Category,
+) error {
+
+	o := orm.NewOrm()
+
+	_, err := o.Delete(category)
 
 	return err
 }
