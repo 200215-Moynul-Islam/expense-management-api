@@ -78,15 +78,77 @@ func (c *CategoryController) Create() {
 	)
 }
 
+func (c *CategoryController) Update() {
+
+	var request dto.UpdateCategoryRequest
+
+	err := json.Unmarshal(
+		c.Ctx.Input.RequestBody,
+		&request,
+	)
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid request body.",
+			nil,
+		)
+		return
+	}
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	id, err := c.GetInt(":id")
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid category ID.",
+			nil,
+		)
+		return
+	}
+
+	err = c.categoryService.UpdateCategory(
+		id,
+		userID,
+		request,
+	)
+	if err != nil {
+		c.handleCategoryError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Category updated successfully.",
+		nil,
+	)
+}
+
 func (c *CategoryController) handleCategoryError(
 	err error,
 ) {
 
 	switch {
 
-	case err == appErrors.ErrCategoryNameRequired,
-		err == appErrors.ErrCategoryNameTooLong,
-		err == appErrors.ErrInvalidRequest:
+	case errors.Is(err, appErrors.ErrCategoryNameRequired),
+		errors.Is(err, appErrors.ErrCategoryNameTooLong),
+		errors.Is(err, appErrors.ErrInvalidRequest):
 
 		utils.SendJSONResponse(
 			c.Ctx,
@@ -96,11 +158,31 @@ func (c *CategoryController) handleCategoryError(
 			nil,
 		)
 
-	case err == appErrors.ErrCategoryExists:
+	case errors.Is(err, appErrors.ErrCategoryExists):
 
 		utils.SendJSONResponse(
 			c.Ctx,
 			http.StatusConflict,
+			false,
+			err.Error(),
+			nil,
+		)
+
+	case errors.Is(err, appErrors.ErrCategoryNotFound):
+
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusNotFound,
+			false,
+			err.Error(),
+			nil,
+		)
+
+	case errors.Is(err, appErrors.ErrForbiddenCategory):
+
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusForbidden,
 			false,
 			err.Error(),
 			nil,

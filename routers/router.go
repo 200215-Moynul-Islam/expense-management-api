@@ -67,7 +67,7 @@ func init() {
 			beego.NSRouter(
 				"/:id",
 				&controllers.CategoryController{},
-				"get:GetByID",
+				"get:GetByID;put:Update",
 			),
 		),
 
