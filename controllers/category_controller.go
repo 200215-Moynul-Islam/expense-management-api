@@ -140,6 +140,50 @@ func (c *CategoryController) Update() {
 	)
 }
 
+func (c *CategoryController) Delete() {
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	id, err := c.GetInt(":id")
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid category ID.",
+			nil,
+		)
+		return
+	}
+
+	err = c.categoryService.DeleteCategory(
+		id,
+		userID,
+	)
+	if err != nil {
+		c.handleCategoryError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Category deleted successfully.",
+		nil,
+	)
+}
+
 func (c *CategoryController) handleCategoryError(
 	err error,
 ) {
