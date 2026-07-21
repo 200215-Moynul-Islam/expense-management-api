@@ -117,3 +117,61 @@ func mapCategoryValidationError(
 
 	return appErrors.ErrInvalidRequest
 }
+
+func ValidateCreateExpenseRequest(
+	request dto.CreateExpenseRequest,
+) error {
+
+	validationEngine := validation.Validation{}
+
+	_, err := validationEngine.Valid(&request)
+	if err != nil {
+		return err
+	}
+
+	if !validationEngine.HasErrors() {
+		return nil
+	}
+
+	return mapExpenseValidationError(
+		validationEngine.Errors[0],
+	)
+}
+
+func mapExpenseValidationError(
+	validationError *validation.Error,
+) error {
+
+	switch validationError.Field {
+
+	case "CategoryID":
+		if validationError.Name == "Required" {
+			return appErrors.ErrCategoryIDRequired
+		}
+
+	case "Title":
+		switch validationError.Name {
+		case "Required":
+			return appErrors.ErrTitleRequired
+		case "MaxSize":
+			return appErrors.ErrTitleTooLong
+		}
+
+	case "Amount":
+		if validationError.Name == "Required" {
+			return appErrors.ErrAmountRequired
+		}
+
+	case "Note":
+		if validationError.Name == "MaxSize" {
+			return appErrors.ErrNoteTooLong
+		}
+
+	case "ExpenseDate":
+		if validationError.Name == "Required" {
+			return appErrors.ErrExpenseDateRequired
+		}
+	}
+
+	return appErrors.ErrInvalidRequest
+}

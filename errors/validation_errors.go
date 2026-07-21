@@ -18,4 +18,11 @@ var (
 
 	ErrCategoryNameRequired = errors.New("Category name is required.")
 	ErrCategoryNameTooLong  = errors.New("Category name must not exceed 100 characters.")
+
+	ErrCategoryIDRequired   = errors.New("Category ID is required.")
+	ErrTitleRequired      = errors.New("Title is required.")
+	ErrTitleTooLong       = errors.New("Title must not exceed 255 characters.")
+	ErrAmountRequired     = errors.New("Amount is required.")
+	ErrNoteTooLong        = errors.New("Note must not exceed 1000 characters.")
+	ErrExpenseDateRequired = errors.New("Expense date is required.")
 )
