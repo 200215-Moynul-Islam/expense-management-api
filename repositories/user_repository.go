@@ -10,6 +10,7 @@ type UserRepository interface {
 	Create(user *models.User) error
 	GetByID(id int) (*models.User, error)
 	GetByEmail(email string) (*models.User, error)
+	Update(user *models.User) error
 }
 
 type postgresUserRepository struct{}
@@ -73,4 +74,15 @@ func (r *postgresUserRepository) GetByEmail(
 	}
 
 	return user, nil
+}
+
+func (r *postgresUserRepository) Update(
+	user *models.User,
+) error {
+
+	o := orm.NewOrm()
+
+	_, err := o.Update(user)
+
+	return err
 }
