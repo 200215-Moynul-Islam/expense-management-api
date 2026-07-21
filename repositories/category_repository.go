@@ -10,6 +10,7 @@ type CategoryRepository interface {
 	Create(category *models.Category) error
 	GetByNameAndUserID(name string, userID int) (*models.Category, error)
 	GetByID(id int) (*models.Category, error)
+	GetAllByUserID(userID int) ([]*models.Category, error)
 }
 
 type categoryRepository struct{}
@@ -77,4 +78,23 @@ func (r *categoryRepository) GetByID(
 	}
 
 	return category, nil
+}
+
+func (r *categoryRepository) GetAllByUserID(
+	userID int,
+) ([]*models.Category, error) {
+
+	o := orm.NewOrm()
+
+	var categories []*models.Category
+
+	_, err := o.QueryTable(new(models.Category)).
+		Filter("user_id", userID).
+		All(&categories)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }
