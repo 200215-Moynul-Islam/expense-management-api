@@ -197,6 +197,50 @@ func (c *ExpenseController) GetByID() {
 	)
 }
 
+func (c *ExpenseController) Delete() {
+
+	userID, ok := c.getUserID()
+	if !ok {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusUnauthorized,
+			false,
+			"Unauthorized.",
+			nil,
+		)
+		return
+	}
+
+	id, err := c.GetInt(":id")
+	if err != nil {
+		utils.SendJSONResponse(
+			c.Ctx,
+			http.StatusBadRequest,
+			false,
+			"Invalid expense ID.",
+			nil,
+		)
+		return
+	}
+
+	err = c.expenseService.DeleteExpense(
+		id,
+		userID,
+	)
+	if err != nil {
+		c.handleError(err)
+		return
+	}
+
+	utils.SendJSONResponse(
+		c.Ctx,
+		http.StatusOK,
+		true,
+		"Expense deleted successfully.",
+		nil,
+	)
+}
+
 func (c *ExpenseController) handleError(
 	err error,
 ) {
